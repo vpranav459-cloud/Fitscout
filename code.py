@@ -1,15 +1,4 @@
-"""
-Sports Connect - Streamlit app v2.0 (upgraded)
-Retains 100% of the original functionality and adds:
-- Charts (matplotlib) for athlete progress and distributions
-- Performance tracking over time (metrics_history.csv)
-- Simple team-athlete matching score
-- Admin analytics / leaderboard
-- Search & filter for athletes
-- CSV export / download buttons
 
-Single-file app. Save as sports_connect.py and run with Streamlit.
-"""
 
 import streamlit as st
 import pandas as pd
@@ -19,9 +8,7 @@ from datetime import datetime
 from typing import Dict, Any, List
 import matplotlib.pyplot as plt
 
-# -------------------------
-# Config
-# -------------------------
+
 st.set_page_config(page_title="Sports Connect v2.0", layout="wide")
 DATA_DIR = "app_data"
 USERS_CSV = os.path.join(DATA_DIR, "users.csv")
@@ -30,9 +17,7 @@ APPLICATIONS_CSV = os.path.join(DATA_DIR, "applications.csv")
 HISTORY_CSV = os.path.join(DATA_DIR, "metrics_history.csv")
 ADMIN_PASSWORD = "admin123"
 
-# -------------------------
-# Utility functions (must stay at top)
-# -------------------------
+
 
 def ensure_data_dir():
     os.makedirs(DATA_DIR, exist_ok=True)
@@ -83,9 +68,7 @@ def bmi_category(bmi: float) -> str:
     except Exception:
         return "Unknown"
 
-# -------------------------
-# History/helper for tracking metrics over time
-# -------------------------
+
 
 def append_history(username: str, metrics: Dict[str, Any]):
     ensure_data_dir()
@@ -114,10 +97,6 @@ def load_history() -> pd.DataFrame:
         return pd.read_csv(HISTORY_CSV)
     return pd.DataFrame(columns=["timestamp","username","bmi","vo2","pace_kmph","training_load","sleep_hours","recovery_score"])
 
-# -------------------------
-# Seed data helper (uses above functions)
-# -------------------------
-
 def seed_data():
     ensure_data_dir()
     # Users
@@ -130,7 +109,7 @@ def seed_data():
         ])
         users.to_csv(USERS_CSV, index=False)
 
-    # Teams
+   
     if not os.path.exists(TEAMS_CSV):
         teams = pd.DataFrame([
             {"team_id": 1, "team_name": "Speedsters FC", "requirement": "Sprinter/Speed-focused; 100m < 11s desirable"},
@@ -151,13 +130,11 @@ def seed_data():
         apps = pd.DataFrame(columns=["app_id","username","team_id","team_name","status","applied_at","admin_note"])
         apps.to_csv(APPLICATIONS_CSV, index=False)
 
-    # History - create empty if not exists
+
     if not os.path.exists(HISTORY_CSV):
         pd.DataFrame(columns=["timestamp","username","bmi","vo2","pace_kmph","training_load","sleep_hours","recovery_score"]).to_csv(HISTORY_CSV, index=False)
 
-# -------------------------
-# Data load/save functions
-# -------------------------
+
 
 def load_users() -> pd.DataFrame:
     ensure_data_dir()
@@ -194,9 +171,6 @@ def save_applications(df: pd.DataFrame):
     ensure_data_dir()
     df.to_csv(APPLICATIONS_CSV, index=False)
 
-# -------------------------
-# CRUD operations
-# -------------------------
 
 def add_user(user: Dict[str, Any]) -> bool:
     df = load_users()
@@ -298,9 +272,7 @@ def compare_clients(usernames: List[str]) -> pd.DataFrame:
         sel["bmi_category"] = sel["bmi"].apply(lambda x: bmi_category(x))
     return sel
 
-# -------------------------
-# Matching logic (simple)
-# -------------------------
+
 
 def team_match_score(username: str, team_id: int) -> float:
     users = load_users()
@@ -317,9 +289,7 @@ def team_match_score(username: str, team_id: int) -> float:
     score = (vo2_score * 0.7) + (bmi_score * 0.3)
     return round(score * 100, 1)
 
-# -------------------------
-# Admin analytics / leaderboard
-# -------------------------
+
 
 def admin_leaderboard(top_n: int = 5) -> Dict[str, pd.DataFrame]:
     users = load_users()
@@ -334,14 +304,9 @@ def admin_leaderboard(top_n: int = 5) -> Dict[str, pd.DataFrame]:
         best_recovery = pd.DataFrame(columns=['username','recovery_score'])
     return {"top_vo2": df_vo2, "best_recovery": best_recovery}
 
-# -------------------------
-# Initialize seed data
-# -------------------------
+
 seed_data()
 
-# -------------------------
-# Streamlit session helpers
-# -------------------------
 
 if 'client_logged_in' not in st.session_state:
     st.session_state['client_logged_in'] = False
@@ -350,17 +315,12 @@ if 'client_username' not in st.session_state:
 if 'admin_logged_in' not in st.session_state:
     st.session_state['admin_logged_in'] = False
 
-# -------------------------
-# Top-level UI: Choose role
-# -------------------------
 st.title("Sports Connect — Athletes & Scouts (v2.0)")
 st.markdown("A compact platform to showcase athletes, manage teams, route applications, and visualize performance.")
 
 role = st.sidebar.radio("I am a:", ("Athlete / Client", "Admin"))
 
-# -------------------------
-# ATHLETE / CLIENT FLOW
-# -------------------------
+
 if role == "Athlete / Client":
     # Show login/register only if not logged in
     if not st.session_state['client_logged_in']:
@@ -578,9 +538,7 @@ if role == "Athlete / Client":
                     for _, r in notes.iterrows():
                         st.info(f"From Admin for {r['team_name']}: {r['admin_note']}")
 
-# -------------------------
-# ADMIN FLOW
-# -------------------------
+
 else:
     st.header("Admin Portal")
     if not st.session_state['admin_logged_in']:
@@ -729,8 +687,7 @@ else:
             st.success("Admin logged out")
             st.rerun()
 
-# -------------------------
-# Footer
-# -------------------------
+
 st.markdown("---")
 st.caption("Sports Connect v2.0 — charts, tracking, matching, and analytics added. Modify further for production.")
+
